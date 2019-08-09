@@ -70,7 +70,7 @@ import './nuxeo-action-button-styles.js';
         >
         </nuxeo-operation>
 
-        <dom-if if="[[_isAvailable(document)]]">
+        <dom-if if="[[_isAvailable(document, locked)]]">
           <template>
             <div class="action">
               <paper-icon-button icon="[[icon]]" noink></paper-icon-button>
@@ -139,8 +139,15 @@ import './nuxeo-action-button-styles.js';
       this.addEventListener('click', this._toggle);
     }
 
-    _isAvailable(doc) {
-      return doc && !doc.isVersion && this.hasPermission(doc, 'Write') && !this.isImmutable(doc) && doc.type !== 'Root';
+    _isAvailable(doc, locked) {
+      return (
+        doc &&
+        !doc.isVersion &&
+        !this.isImmutable(doc) &&
+        doc.type !== 'Root' &&
+        // XXX To be removed after NXP-27822 being solved.
+        (this.hasPermission(doc, 'Write') || (locked && this.hasPermission(doc, 'Read')))
+      );
     }
 
     _toggle() {
